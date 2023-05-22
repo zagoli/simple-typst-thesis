@@ -28,18 +28,18 @@
 #let getHeader() = {
   locate(loc => {
     // Find if there is a level 1 heading on the current page
-    let nextMainHeading = query(heading, after: loc).find(headIt => {
-      headIt.location().page() == loc.page() and headIt.level == 1
+    let nextMainHeading = query(selector(heading).after(loc), loc).find(headIt => {
+     headIt.location().page() == loc.page() and headIt.level == 1
     })
     if (nextMainHeading != none) {
       return buildMainHeader(nextMainHeading.body)
     }
     // Find the last previous level 1 heading -- at this point surely there's one :-)
-    let lastMainHeading = query(heading, before: loc).filter(headIt => {
+    let lastMainHeading = query(selector(heading).before(loc), loc).filter(headIt => {
       headIt.level == 1
     }).last()
     // Find if the last level > 1 heading in previous pages
-    let previousSecondaryHeadingArray = query(heading, before: loc).filter(headIt => {
+    let previousSecondaryHeadingArray = query(selector(heading).before(loc), loc).filter(headIt => {
       headIt.level > 1
     })
     let lastSecondaryHeading = if (previousSecondaryHeadingArray.len() != 0) {previousSecondaryHeadingArray.last()} else {none}
