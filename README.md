@@ -6,3 +6,7 @@ Each page of the main body has a custom header. The header shows what the curren
 - If the current page has a main heading, the header uses that.
 - If not, the header combines the last main and secondary headings from previous pages.
 - Sometimes, there are no secondary headings on previous pages. In that case, the header only uses the last main heading.
+
+### PDF
+
+[main.pdf](https://github.com/agoli/simple-typst-thesis/raw/master/main.pdf)
