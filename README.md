@@ -9,4 +9,4 @@ Each page of the main body has a custom header. The header shows what the curren
 
 ### PDF
 
-[main.pdf](https://github.com/agoli/simple-typst-thesis/raw/master/main.pdf)
+[main.pdf](https://github.com/zagoli/simple-typst-thesis/blob/main/main.pdf)
