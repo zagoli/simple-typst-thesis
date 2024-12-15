@@ -121,6 +121,7 @@
   // Main body.
   set page(numbering: "1", number-align: center)
   set par(first-line-indent: 20pt)
+  show bibliography: set par(first-line-indent: 0pt)
   set page(header: getHeader())
   counter(page).update(1)
   body
