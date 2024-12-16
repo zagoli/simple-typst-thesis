@@ -13,10 +13,10 @@
 )
 
 = Introduction
-#lorem(60)
+#lorem(60) @feminism
 
 == In this paper
-#lorem(20)
+#lorem(20) @dependence
 
 === Contributions
 #lorem(40)
@@ -53,4 +53,4 @@
 #pagebreak(weak: true)
 #set page(header: [])
 = Bibliography
-#lorem(30)
+#bibliography("bib.yaml", style:"apa", title:none)
