@@ -1,55 +1,57 @@
 #let buildMainHeader(mainHeadingContent) = {
-  [
-    #align(center, smallcaps(mainHeadingContent)) 
-    #line(length: 100%)
-  ]
+  align(center, smallcaps(mainHeadingContent))
+  line(length: 100%)
 }
 
 #let buildSecondaryHeader(mainHeadingContent, secondaryHeadingContent) = {
-  [
-    #smallcaps(mainHeadingContent)  #h(1fr)  #emph(secondaryHeadingContent) 
-    #line(length: 100%)
-  ]
+  smallcaps(mainHeadingContent)
+  h(1fr) 
+  emph(secondaryHeadingContent)
+  line(length: 100%)
 }
 
 // To know if the secondary heading appears after the main heading
 #let isAfter(secondaryHeading, mainHeading) = {
   let secHeadPos = secondaryHeading.location().position()
   let mainHeadPos = mainHeading.location().position()
-  if (secHeadPos.at("page") > mainHeadPos.at("page")) {
-    return true
+  if secHeadPos.at("page") > mainHeadPos.at("page") {
+    true
+  } else if secHeadPos.at("page") == mainHeadPos.at("page") {
+    secHeadPos.at("y") > mainHeadPos.at("y")
+  } else {
+    false
   }
-  if (secHeadPos.at("page") == mainHeadPos.at("page")) {
-    return secHeadPos.at("y") > mainHeadPos.at("y")
-  }
-  return false
 }
 
-#let getHeader() = {
-  locate(loc => {
-    // Find if there is a level 1 heading on the current page
-    let nextMainHeading = query(selector(heading).after(loc), loc).find(headIt => {
-     headIt.location().page() == loc.page() and headIt.level == 1
-    })
-    if (nextMainHeading != none) {
-      return buildMainHeader(nextMainHeading.body)
-    }
-    // Find the last previous level 1 heading -- at this point surely there's one :-)
-    let lastMainHeading = query(selector(heading).before(loc), loc).filter(headIt => {
-      headIt.level == 1
-    }).last()
-    // Find if the last level > 1 heading in previous pages
-    let previousSecondaryHeadingArray = query(selector(heading).before(loc), loc).filter(headIt => {
-      headIt.level > 1
-    })
-    let lastSecondaryHeading = if (previousSecondaryHeadingArray.len() != 0) {previousSecondaryHeadingArray.last()} else {none}
-    // Find if the last secondary heading exists and if it's after the last main heading
+#let getHeader()  =  {
+  let loc = here()
+  // Find if there is a level 1 heading on the current page
+  let nextMainHeading = query(selector(heading).after(loc))
+    .find(headIt => headIt.location().page() == loc.page() and headIt.level == 1)
+  if (nextMainHeading != none) {
+    buildMainHeader(nextMainHeading.body)
+  } else {
+    // Find the last previous level 1 heading
+    let lastMainHeading = query(selector(heading).before(loc))
+      .filter(headIt => headIt.level == 1)
+      .last()
+    // Find any previous secondary headings (> level 1)
+    let previousSecondaryHeadingArray = query(selector(heading).before(loc))
+      .filter(headIt => headIt.level > 1)
+    let lastSecondaryHeading = if (previousSecondaryHeadingArray.len() != 0) {
+        previousSecondaryHeadingArray.last()
+      } else {
+        none
+      }
+    // Check if the last secondary heading comes after the last main heading
     if (lastSecondaryHeading != none and isAfter(lastSecondaryHeading, lastMainHeading)) {
-      return buildSecondaryHeader(lastMainHeading.body, lastSecondaryHeading.body)
+      buildSecondaryHeader(lastMainHeading.body, lastSecondaryHeading.body)
+    } else {
+      buildMainHeader(lastMainHeading.body)
     }
-    return buildMainHeader(lastMainHeading.body)
-  })
+  }
 }
+
 
 #let project(
   title: "",
@@ -61,15 +63,13 @@
   // Set the document's basic properties.
   set document(author: authors.map(a => a.name), title: title)
   set text(font: "New Computer Modern", lang: "en")
-  show math.equation: set text(weight: 400)
+  show math.equation: it => set text(weight: 400)
   set heading(numbering: "1.1")
   set par(justify: true)
 
   // Title page.
   v(0.25fr)
-  align(center)[
-    #text(2em, weight: 700, title)
-  ]
+  align(center,text(2em, weight: 700, title))
 
   // Author information.
   pad(
@@ -77,14 +77,18 @@
     grid(
       columns: (1fr),
       gutter: 1em,
-      ..authors.map(author => align(center)[
-        *#author.name* \
-        #author.email \
-        #author.affiliation \
-        #author.postal \
-        #author.phone
-      ]),
-    ),
+      ..authors.map(author => 
+        align(center,
+          [
+            *#author.name* \ 
+            #author.email \ 
+            #author.affiliation \ 
+            #author.postal \ 
+            #author.phone
+          ]
+        )
+      )
+    )
   )
 
   // Logo
@@ -99,30 +103,23 @@
   pagebreak()
 
   // Abstract page.
-  set page(numbering: "I", number-align: center)
+  set page(numbering: "I", number-align: center, margin: 10em)
   v(1fr)
-  align(center)[
-    #heading(
-      outlined: false,
-      numbering: none,
-      text(0.85em, smallcaps[Abstract]),
-    )
-  ]
+  align(center, heading(outlined: false, numbering: none, text(0.85em, smallcaps[Abstract])))
   abstract
   v(1.618fr)
+
+  // Table of contents.
   counter(page).update(1)
   pagebreak()
 
-  // Table of contents.
-  outline(depth: 3, indent: true)
+  outline(depth: 3)
   pagebreak()
 
-
   // Main body.
-  set page(numbering: "1", number-align: center)
+  set page(numbering: "1", number-align: center, margin: auto)
   set par(first-line-indent: 20pt)
-  show bibliography: set par(first-line-indent: 0pt) 
-  set page(header: getHeader())
+  set page(header: context getHeader())
   counter(page).update(1)
   body
 }
